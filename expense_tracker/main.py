@@ -3,8 +3,6 @@ from utils import (
     add_expense,
     calculate_total_expenditure,
     InvalidExpenditureError,
-    InvalidCategoryError,
-    InvalidAmountError,
 )
 
 def menu() -> None:
@@ -18,21 +16,21 @@ def menu() -> None:
     print("[4.] Exit")
 
 def get_expense(ledger: list) -> None:
-    raw_amount = input("Enter expense amount (e.g, 12.50): ")
-    raw_category = input("Enter expense category: ")
-    raw_description = input("Enter expense description: ")
-
     try:
-        dec_amount = Decimal(raw_amount)
+        raw_amount = Decimal(input("Enter expense amount (e.g, 12.50): "))
+        raw_category = input("Enter expense category: ")
+        raw_description = input("Enter expense description: ")
         new_record = add_expense(
-            ledger, dec_amount, raw_category, raw_description
+            ledger, raw_amount, raw_category, raw_description
         )
         print(f"✅ Success! Added '{new_record['category']}' expense to the ledger.")
 
     except InvalidOperation:
         print("Error:- Invalid number format. Please enter a valid number.")
+        return
     except InvalidExpenditureError as e:
         print(f"Business logic Error: {e}")
+        return
 
 
 def view_expenses(ledger: list) -> None:
