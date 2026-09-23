@@ -4,9 +4,14 @@ from decimal import Decimal
 from utils import (
    add_expense, 
    calculate_total_expenditure,
+   calculate_category_aggregate,
    InvalidExpenditureError,
    InvalidAmountError,
    InvalidCategoryError,
+   get_category_counts,
+   filter_by_category,
+   delete_expense_by_id,
+   ExpenseNotFoundError,
 )
 
 def test_add_expense_valid_record():
@@ -95,3 +100,86 @@ def test_add_expense_saves_authentic_string_type():
         "Check your code and ensure you called the string methods using parentheses ()."
     )
     assert returned_record["category"] == "Food"
+
+def test_add_expense_generates_sequential_ids():
+    ledger = []
+    # 2. Act
+    first = add_expense(ledger, Decimal("10.00"), "Food", "Breakfast")
+    second = add_expense(ledger, Decimal("20.00"), "Transport", "Bus")
+    third = add_expense(ledger, Decimal("30.00"), "Food", "Dinner")
+    # 3. Assert
+    assert first["id"] == 1
+    assert second["id"] == 2
+    assert third["id"] == 3
+    # Now simulate deletion of item 2:
+    delete_expense_by_id(ledger, 2)
+    # Add a fourth expense:
+    fourth = add_expense(ledger, Decimal("40.00"), "Bills", "Internet")
+    # The new ID must be 4, NOT 3 (proving collision immunity)
+    assert fourth["id"] == 4
+
+
+def test_delete_expense_by_id_success():
+    ledger = []
+    item1 = add_expense(ledger, Decimal("15.00"), "Food", "Lunch")
+    item2 = add_expense(ledger, Decimal("50.00"), "Utilities", "Power")
+    # 2. Act: Delete item 1
+    removed_record = delete_expense_by_id(ledger, 1)
+    # 3. Assert
+    assert removed_record["id"] == 1
+    assert removed_record["category"] == "Food"
+    assert len(ledger) == 1
+    assert ledger[0]["id"] == 2
+
+
+def test_delete_expense_by_id_not_found_raises():
+    ledger = []
+    # 1. Arrange
+    ledger = []
+    add_expense(ledger, Decimal("10.00"), "Food", "Snack")
+    # 2. Act & Assert: Target ID 999 does not exist
+    with pytest.raises(ExpenseNotFoundError):
+        delete_expense_by_id(ledger, 999)
+    # Verify ledger was not mutated
+    assert len(ledger) == 1
+
+
+def test_calculate_category_aggregate():
+    ledger = []
+    add_expense(ledger, Decimal("10.00"), "Food", "Lunch")
+    add_expense(ledger, Decimal("15.50"), "Food", "Dinner")
+    add_expense(ledger, Decimal("40.00"), "Transport", "Fuel")
+    # 2. Act
+    summary = calculate_category_aggregate(ledger)
+    # 3. Assert
+    assert summary["Food"] == Decimal("25.50")
+    assert summary["Transport"] == Decimal("40.00")
+    assert "Bills" not in summary
+
+
+def test_filter_by_category():
+    ledger = []
+    add_expense(ledger, Decimal("12.00"), "Food", "Groceries")
+    add_expense(ledger, Decimal("25.00"), "Transport", "Taxi")
+    add_expense(ledger, Decimal("8.00"), "Food", "Coffee")
+    # 2. Act: Query with mixed case and leading/trailing whitespace
+    food_results = filter_by_category(ledger, "   food   ")
+    # 3. Assert
+    assert len(food_results) == 2
+    assert all(item["category"] == "Food" for item in food_results)
+
+
+def test_get_category_counts():
+    # 1. Arrange: Empty ledger check
+    assert get_category_counts([]) == {}
+    # 2. Arrange: Ledger with multiple items
+    ledger = []
+    add_expense(ledger, Decimal("10.00"), "Food", "Breakfast")
+    add_expense(ledger, Decimal("15.00"), "Food", "Lunch")
+    add_expense(ledger, Decimal("30.00"), "Transport", "Taxi")
+    # 3. Act
+    counts = get_category_counts(ledger)
+    # 4. Assert
+    assert counts["Food"] == 2
+    assert counts["Transport"] == 1
+    assert "Bills" not in counts
