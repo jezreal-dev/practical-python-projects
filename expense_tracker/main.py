@@ -15,6 +15,16 @@ from utils import (add_expense,
 )
 
 DATA_FILE = Path(__file__).parent / "expenses_log.json"
+
+class ActionCancelled(Exception):
+    """Raised when the user cancels an input flow."""
+    pass
+
+def prompt_input(prompt_text: str) -> str:
+    val = input(prompt_text).strip()
+    if val.lower() in ('q', 'cancel'):
+        raise ActionCancelled()
+    return val
 def menu() -> None:
     """Command-line interface"""
     os.system("clear")
@@ -31,22 +41,38 @@ def menu() -> None:
 
 def get_expense(ledger: list):
     try:
-        raw_amount = Decimal(input("Enter expense amount (e.g, ₦ 12.50): "))
-        validate_amount(raw_amount)
-        raw_category = input("Enter expense category: ")
-        raw_description = input("Enter expense description: ")
-        new_record = add_expense(
-            ledger, raw_amount, raw_category, raw_description
-        )
-        save_ledger_to_json(ledger, DATA_FILE)
-        print(f"✅ Success! Added '{new_record['category']}' expense to the ledger.")
+        while True:
+            while True:
+                raw_input = prompt_input("\nEnter expense amount (or 'q'/'cancel' to exit): ")
+                try:
+                    raw_amount = Decimal(raw_input)
+                    validate_amount(raw_amount)
+                    break
+                except (InvalidOperation, InvalidExpenditureError) as err:
+                    print(f"Error: {err}. Please enter a valid positive number.")
+            
+            while True:        
+                raw_category = prompt_input("Enter expense category (or 'q'/'cancel' to exit): ")
+                if raw_category:
+                    break
+                print("Error: Category cannot be empty. Please try again.")
 
-    except InvalidOperation:
-        print("Error:- Invalid number format. Please enter a valid number.")
-        return
-    except InvalidExpenditureError as e:
-        print(f"Business logic Error: {e}")
-        return
+            while True:
+                raw_description = prompt_input("Enter expense description (or 'q'/'cancel' to exit): ")
+                if raw_description:
+                    break
+                print("Error: Description cannot be empty. Please try again.")
+                
+            new_record = add_expense(
+                        ledger, raw_amount, raw_category, raw_description
+                    )
+            save_ledger_to_json(ledger, DATA_FILE)
+            print(f"✅ Success! Added '{new_record['category']}' expense to the ledger.")
+            again = prompt_input("\nDo you want to add another expense? (y/n): ").strip().lower()
+            if again not in ('y', 'yes'):
+                break
+    except ActionCancelled:
+        print("\nAction cancelled. Returning to main menu...")
 
 
 def view_expenses(ledger: list):
@@ -156,25 +182,33 @@ def main():
 
     while True:
         menu()
-        choice = input("Select an option between [1]..&..[7]: ").strip()
-        if choice == "1":
-                get_expense(ledger)
-        elif choice == "2":
-            view_expenses(ledger)
-        elif choice == "3":
-            total = calculate_total_expenditure(ledger)
-            print(f"\nTOTAL ACCUMULATED EXPENDITURE 📊: ₦{total:.2f}")
-        elif choice == "4":
-            display_category_breakdown(ledger)
-        elif choice == "5":
-            handle_filter_by_category(ledger)
-        elif choice == "6":
-            handle_delete_expense(ledger)
-        elif choice == "7":
-            print("GOOD BYE👋...SEE YOU AGAIN HOPE SOON.")
-            break
-        else: 
-            print("Invalid Menu choice🙃! Please Select an Option between [1]..&.[7].")
+        raw_choice = input("Select an option between [1]..&..[7]: ")
+        if raw_choice.isdigit():
+            choice = int(raw_choice)
+
+            if choice == 1:
+                    get_expense(ledger)
+                    continue
+            elif choice == 2:
+                view_expenses(ledger)
+            elif choice == 3:
+                total = calculate_total_expenditure(ledger)
+                print(f"\nTOTAL ACCUMULATED EXPENDITURE 📊: ₦{total:.2f}")
+            elif choice == 4:
+                display_category_breakdown(ledger)
+            elif choice == 5:
+                handle_filter_by_category(ledger)
+            elif choice == 6:
+                handle_delete_expense(ledger)
+            elif choice == 7:
+                print("GOOD BYE👋...SEE YOU AGAIN HOPE SOON.")
+                break
+            else: 
+                print("Error: Number out of range! Please choose between 1 and 7.")
+            
+        else:
+            print("Error: Invalid choice! Please enter a single number (1-7) without spaces or letters.")
+        
         input("\nPress [Enter] to return to the main menu...")
 
 

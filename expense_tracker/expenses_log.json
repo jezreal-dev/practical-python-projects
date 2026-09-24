@@ -1,0 +1,65 @@
+[
+    {
+        "id": 2,
+        "date": "2026-09-24",
+        "category": "Groceries",
+        "amount": "2450",
+        "description": "Garri"
+    },
+    {
+        "id": 3,
+        "date": "2026-09-24",
+        "category": "Transport",
+        "amount": "200",
+        "description": "Tfare"
+    },
+    {
+        "id": 4,
+        "date": "2026-09-24",
+        "category": "Food",
+        "amount": "500",
+        "description": "Lunch"
+    },
+    {
+        "id": 5,
+        "date": "2026-09-24",
+        "category": "Food",
+        "amount": "700",
+        "description": "Dinner"
+    },
+    {
+        "id": 6,
+        "date": "2026-09-24",
+        "category": "Food",
+        "amount": "23",
+        "description": "Groceries"
+    },
+    {
+        "id": 7,
+        "date": "2026-09-24",
+        "category": "Groceries",
+        "amount": "231",
+        "description": "Food"
+    },
+    {
+        "id": 8,
+        "date": "2026-09-24",
+        "category": "Description",
+        "amount": "234",
+        "description": "Category"
+    },
+    {
+        "id": 9,
+        "date": "2026-09-24",
+        "category": "Def",
+        "amount": "450",
+        "description": "Diieje"
+    },
+    {
+        "id": 10,
+        "date": "2026-09-24",
+        "category": "Q",
+        "amount": "4593",
+        "description": ".................................."
+    }
+]
