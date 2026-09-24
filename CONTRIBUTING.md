@@ -21,7 +21,7 @@ Every contribution must follow these four core principles:
 
 ### 1. Fork and Clone
 ```bash
-git clone https://github.com/jezreal-dev/python_practice_projects.git
+git clone https://github.com/jezreal-dev/practical-python-projects.git
 cd python_practice_projects
 ```
 

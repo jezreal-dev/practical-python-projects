@@ -157,7 +157,6 @@ def main():
     while True:
         menu()
         choice = input("Select an option between [1]..&..[7]: ").strip()
-
         if choice == "1":
                 get_expense(ledger)
         elif choice == "2":
@@ -172,7 +171,7 @@ def main():
         elif choice == "6":
             handle_delete_expense(ledger)
         elif choice == "7":
-            print("SEE YOU AGAIN HOPE SOON...GOOD BYE👋.")
+            print("GOOD BYE👋...SEE YOU AGAIN HOPE SOON.")
             break
         else: 
             print("Invalid Menu choice🙃! Please Select an Option between [1]..&.[7].")

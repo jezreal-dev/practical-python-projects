@@ -72,7 +72,7 @@ Every project adheres to these non-negotiable implementation rules:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/jezreal-dev/python_practice_projects.git
+   git clone https://github.com/jezreal-dev/practical-python-projects.git
    cd python_practice_projects
    ```
 
