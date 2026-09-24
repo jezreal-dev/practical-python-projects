@@ -12,8 +12,8 @@ from utils import (
    filter_by_category,
    delete_expense_by_id,
    ExpenseNotFoundError,
-   save_ledger_to_file,
-   load_ledger_from_file,
+   save_ledger_to_json,
+   load_ledger_from_json,
 )
 
 def test_add_expense_valid_record():
@@ -189,20 +189,27 @@ def test_get_category_counts():
 
 def test_load_ledger_nonexistent_file(tmp_path):
     ghost_file = tmp_path / "missing.txt"
-    assert load_ledger_from_file(ghost_file) == []
+    assert load_ledger_from_json(ghost_file) == []
 
 
-def test_save_and_load_plain_text_roundtrip(tmp_path):
-    test_file = tmp_path / "expenses.txt"
+def test_save_and_load_json_roundtrip(tmp_path):
+    test_file = tmp_path / "expenses.json"
     ledger = []
     add_expense(ledger, Decimal("15.50"), "Food", "Lunch")
     add_expense(ledger, Decimal("40.00"), "Transport", "Taxi")
-    save_ledger_to_file(ledger, test_file)
-    reloaded = load_ledger_from_file(test_file)
+    save_ledger_to_json(ledger, test_file)
+    reloaded = load_ledger_from_json(test_file)
     assert len(reloaded) == 2
     assert reloaded[0]["id"] == 1
+    assert isinstance(reloaded[0]["id"], int)
     assert reloaded[0]["amount"] == Decimal("15.50")
     assert isinstance(reloaded[0]["amount"], Decimal)
     assert isinstance(reloaded[0]["date"], date)
     assert reloaded[0]["category"] == "Food"
     assert reloaded[0]["description"] == "Lunch"
+
+
+def test_load_ledger_corrupted_json(tmp_path):
+    bad_file = tmp_path / "broken.json"
+    bad_file.write_text("{malformed json...")
+    assert load_ledger_from_json(bad_file) == []

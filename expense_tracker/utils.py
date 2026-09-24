@@ -2,6 +2,7 @@ from decimal import Decimal
 from datetime import date
 from typing import Any
 from pathlib import Path
+import json
 
 class InvalidExpenditureError(ValueError):
     """Base exception for all expenditure domain invariant violations."""
@@ -89,36 +90,43 @@ def get_category_counts(ledger: list[dict[str, Any]]) -> dict[str, int]:
     return counts
 
 
-def save_ledger_to_file(ledger: list[dict[str, Any]], filepath: str | Path) -> None:
+def save_ledger_to_json(ledger: list[dict[str, Any]], filepath: str | Path) -> None:
     path = Path(filepath)
 
+    serializable_data = []
+    for item in ledger:
+        record = {
+            "id": item["id"],
+            "date": item["date"].isoformat(),
+            "category": item["category"],
+            "amount": str(item["amount"]),
+            "description": item["description"],
+        }
+        serializable_data.append(record)
+
     with open(path, "w", encoding="utf-8") as file:
-        for item in ledger:
-            raw_line = f"{item['id']},{item['date']},{item['category']},{item['amount']},{item['description']}\n"
-            file.write(raw_line)
+        json.dump(serializable_data, file, indent=4)
 
 
-def load_ledger_from_file(filepath: str | Path) -> list[dict[str, Any]]:
+def load_ledger_from_json(filepath: str | Path) -> list[dict[str, Any]]:
     path = Path(filepath)
     if not path.exists():
         return []
 
-    reload_ledger = []
     with open(path, "r", encoding="utf-8") as file:
-        for raw_line in file:
-            clean_line = raw_line.strip()
-            if not clean_line:
-                continue
-            parts = clean_line.split(",", maxsplit=4)
+        try:
+            raw_data = json.load(file)
+        except json.JSONDecodeError:
+            return []
 
-            if len(parts) < 5:
-                continue
-            record = {
-                "id": int(parts[0]),
-                "date": date.fromisoformat(parts[1]),
-                "category": parts[2],
-                "amount": Decimal(parts[3]),
-                "description": parts[4],
-            }
-            reload_ledger.append(record)
+    reload_ledger = []
+    for item in raw_data:
+        record = {
+            "id": int(item["id"]),
+            "date": date.fromisoformat(item["date"]),
+            "category": item["category"],
+            "amount": Decimal(item["amount"]),
+            "description": item["description"],
+        }
+        reload_ledger.append(record)
     return reload_ledger

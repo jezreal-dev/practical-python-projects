@@ -10,11 +10,11 @@ from utils import (add_expense,
     get_category_counts,
     InvalidExpenditureError,
     ExpenseNotFoundError,
-    save_ledger_to_file,
-    load_ledger_from_file,
+    save_ledger_to_json,
+    load_ledger_from_json,
 )
 
-DATA_FILE = Path(__file__).parent / "expenses.txt"
+DATA_FILE = Path(__file__).parent / "expenses_log.json"
 def menu() -> None:
     """Command-line interface"""
     os.system("clear")
@@ -38,7 +38,7 @@ def get_expense(ledger: list):
         new_record = add_expense(
             ledger, raw_amount, raw_category, raw_description
         )
-        save_ledger_to_file(ledger, DATA_FILE)
+        save_ledger_to_json(ledger, DATA_FILE)
         print(f"✅ Success! Added '{new_record['category']}' expense to the ledger.")
 
     except InvalidOperation:
@@ -139,7 +139,7 @@ def handle_delete_expense(ledger: list):
         return
     try:
         deleted_record = delete_expense_by_id(ledger, expense_id)
-        save_ledger_to_file(ledger, DATA_FILE)
+        save_ledger_to_json(ledger, DATA_FILE)
         print(
             f"✅ Successfully deleted Expense | "
             f"ID: {deleted_record['id']} | "
@@ -152,7 +152,7 @@ def handle_delete_expense(ledger: list):
 
 
 def main():
-    ledger = load_ledger_from_file(DATA_FILE)
+    ledger = load_ledger_from_json(DATA_FILE)
 
     while True:
         menu()
