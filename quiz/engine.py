@@ -1,3 +1,4 @@
+import random
 from typing import Any
 
 
@@ -65,3 +66,69 @@ def calculate_score(total_questions: int, correct_answers: int) -> dict[str, Any
         "percentage": percentage,
         "passed": percentage >= 50.0,
     }
+
+
+# Returns a dictionary with counts of questions per topic
+def get_topic_counts(question_bank: list[dict[str, Any]]) -> dict[str, int]:
+    counts = {}
+    for question in question_bank:
+        validate_question(question)
+        topic = question["topic"].strip()
+        counts[topic] = counts.get(topic, 0) + 1
+    return counts
+
+
+# Filters questions based on topic and difficulty, returning a list of matching questions
+def filter_questions(
+    question_bank: list[dict[str, Any]], 
+    topic: str | None = None, 
+    difficulty: str | None = None
+) -> list[dict[str, Any]]:
+    if topic is not None and (not isinstance(topic, str) or not topic.strip()):
+        raise QuizError("Topic filter cannot be an empty string.")
+    if difficulty is not None and (not isinstance(difficulty, str) or not difficulty.strip()):
+        raise QuizError("Difficulty filter cannot be an empty string.")
+
+    filtered = []
+    for quest in question_bank:
+        validate_question(quest)
+
+        if topic is not None:
+            if quest["topic"].strip().casefold() != topic.strip().casefold():
+                continue
+
+        if difficulty is not None:
+            if quest["difficulty"].strip().casefold() != difficulty.strip().casefold():
+                continue
+        filtered.append(quest)
+    return filtered
+
+
+# Prepares a quiz deck by shuffling the question bank and applying an optional limit
+def prepare_quiz_deck(
+    question_bank: list[dict[str, Any]],
+    limit: int | None = None,
+    exclude_ids: set[int] | None = None,
+    seed: int | None = None,
+) -> list[dict[str, Any]]:
+    if limit is not None and limit <= 0:
+        raise QuizError("Question limit must be greater than zero.")
+    for quest in question_bank:
+        validate_question(quest)
+
+    excluded = exclude_ids or set()
+    unseen = [quest for quest in question_bank if quest.get("id") not in excluded]
+    seen = [quest for quest in question_bank if quest.get("id") in excluded]
+
+    rng = random.Random(seed)
+    rng.shuffle(unseen)
+    rng.shuffle(seen)
+
+    deck = unseen + seen
+
+    if limit is not None:
+        return deck[:limit]
+    return deck
+
+
+

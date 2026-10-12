@@ -19,3 +19,11 @@ htmlcov/
 Thumbs.db
 .vscode/
 .idea/
+
+# Type Checker & Linter Caches
+.mypy_cache/
+.ruff_cache/
+
+# Environment & Local Runtime Logs
+.env
+*.log
