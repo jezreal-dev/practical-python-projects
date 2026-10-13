@@ -38,7 +38,7 @@ Each application separates responsibilities across three boundaries:
 | # | Project | Focus Area | Status | Documentation & Code |
 | :-: | :--- | :--- | :-: | :--- |
 | **01** | **Expense Tracker** | Invariant validation, `Decimal` arithmetic, JSON persistence | Completed | [Documentation](expense_tracker/README.md) \| [Code](expense_tracker/) |
-| **02** | **Quiz Game** | Question pools, state management, scoring algorithms, random seeding | In Progress | [Project Folder](quiz/) |
+| **02** | **Quiz Game** | Question pools, state management, scoring algorithms, random seeding | Completed | [Documentation](quiz/README.md) | [Code](quiz/) |
 | **03** | **To-Do CLI** | CRUD operations, priority filtering, date parsing, JSON persistence | Queued | [Project Folder](to_do_cli_application/) |
 | **04** | **Library Manager** | Entity relationships, borrowing rules, search indexing | Queued | [Project Folder](library_management_system/) |
 | **05** | **Banking System** | Object-oriented design, encapsulation, balance invariants | Queued | [Project Folder](simple_banking_system/) |

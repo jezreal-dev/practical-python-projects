@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import random
 from typing import Any
 
@@ -131,4 +133,24 @@ def prepare_quiz_deck(
     return deck
 
 
+def load_question_bank(filepath: Path | str) -> list[dict[str, Any]]:
+    path = Path(filepath)
 
+    if not path.exists():
+        raise QuizError(f"Question bank file not found: {filepath}")
+
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            data = json.load(file)
+    except json.JSONDecodeError as err:
+        raise InvalidQuestionError(f"Failed to parse JSON from {filepath}: {err}")
+
+    if not isinstance(data, list) or len(data) == 0:
+        raise InvalidQuestionError(f"Question bank must be a non-empty list of questions in {filepath}")
+
+    for question in data:
+        if not isinstance(question, dict):
+            raise InvalidQuestionError("Each question must be a dictionary.")
+        validate_question(question)
+
+    return data

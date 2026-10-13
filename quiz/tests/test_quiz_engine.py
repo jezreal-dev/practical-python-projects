@@ -1,3 +1,5 @@
+import json
+from pathlib import Path
 import pytest
 from engine import (
     QuizError,
@@ -9,6 +11,7 @@ from engine import (
     validate_question,
     evaluate_answer,
     calculate_score,
+    load_question_bank,
 )
 
 # --- Helper Fixture or Sample Data ---
@@ -227,3 +230,30 @@ def test_prepare_quiz_deck_invalid_limit_fails(sample_bank):
 
     with pytest.raises(QuizError):
         prepare_quiz_deck(sample_bank, limit=-5)
+
+
+# --- 6. JSON File Loading Tests ---
+
+def test_load_question_bank_valid(tmp_path, sample_bank):
+    # Arrange:
+    file_path = tmp_path / "valid_questions.json"
+    file_path.write_text(json.dumps(sample_bank), encoding="utf-8")
+
+    # Act:
+    loaded = load_question_bank(file_path)
+
+    # Assert:
+    assert len(loaded) == 4
+    assert loaded[0]["topic"] == "Python"
+
+
+def test_load_question_bank_missing_or_corrupt_fails(tmp_path):
+    # Act & Assert 1 (Missing file raises QuizError):
+    with pytest.raises(QuizError):
+        load_question_bank(tmp_path / "does_not_exist.json")
+
+    # Act & Assert 2 (Corrupt JSON raises InvalidQuestionError):
+    bad_file = tmp_path / "corrupt.json"
+    bad_file.write_text("{bad json...", encoding="utf-8")
+    with pytest.raises(InvalidQuestionError):
+        load_question_bank(bad_file)
